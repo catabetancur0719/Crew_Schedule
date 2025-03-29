@@ -7,19 +7,14 @@ export default function Header() {
         <SafeAreaView style={styles.container}>  
 
             <Text style={styles.titleText}>Catarata Airways</Text>
-
-            <View style={styles.filters}>
-                <PilotFilter />
-                <AirplaneFilter />
-            </View>
-
+            
         </SafeAreaView>  
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex:0.1,        
+        flex:1/6,        
         alignItems: "center", 
         justifyContent:"center",
         backgroundColor:"#9c80f5"    
@@ -28,13 +23,24 @@ const styles = StyleSheet.create({
     titleText: {
         fontSize: 20,
         fontWeight: "bold",
+        color: "white"
     },
 
     filters: {
         flexDirection: "row", 
         justifyContent: "space-around",
-        alignItems:"center",
+        alignItems:"center", 
+        
     },
+
+    button: {
+        borderWidth: 2,
+        borderColor: "#ff4500",
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+      },
+      
 
 
 });
