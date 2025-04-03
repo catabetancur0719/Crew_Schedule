@@ -1,24 +1,27 @@
 import { SelectList } from "react-native-dropdown-select-list";
 import { useState } from "react";
-import { StyleSheet,  } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { StyleSheet } from "react-native";
 
-export default function AirplaneFilter() {
+export default function AirplaneFilter({ onSelectAirplane }) {
   const [airplaneSelected, setAirplaneSelected] = useState("");
 
   const airplanes = [
-    { key: "1", value: "HK-4522" },
-    { key: "2", value: "HK-4775" },
-    { key: "3", value: "HK-4521" },
+    { key: "HK-4522", value: "HK-4522" },
+    { key:  "HK-4775" , value: "HK-4775" },
+    { key: "HK-4521", value: "HK-4521" },
   ];
+
+  const handleSelection = (value) => {
+    setAirplaneSelected(value);
+    onSelectAirplane(value); // Enviar el avión seleccionado al componente padre
+  };
 
   return (
     <SelectList
-      setSelected={setAirplaneSelected}
+      setSelected={handleSelection}
       data={airplanes}
-      placeholder="Arplane" 
+      placeholder="Select an Airplane"
       boxStyles={styles.listado}
- 
     />
   );
 }

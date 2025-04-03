@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Modal, TouchableOpacity, StyleSheet, TextInput } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import PilotFilter from "./PilotFilter";
@@ -7,58 +7,105 @@ import AirplaneFilter from "./AirplaneFilter";
 import { routes } from "../data/routes"; 
 
 export default function CalendarModal({ visible, selectedDate, onClose }) {
-  const [flightNumbers, setFlightNumbers] = useState(["", "", "", "", ""]);
-  const [flightRoutes, setFlightRoutes] = useState([null, null, null, null, null]);
+  // Estado para almacenar la información por fecha
+  const [schedule, setSchedule] = useState({});
+  
+  const currentSchedule = schedule[selectedDate] || {
+    flightNumbers: ["", "", "", "", ""],
+    flightRoutes: [null, null, null, null, null],
+    selectedPilot: null,
+    selectedAirplane: null,
+  };
+
+  const [flightNumbers, setFlightNumbers] = useState(currentSchedule.flightNumbers);
+  const [flightRoutes, setFlightRoutes] = useState(currentSchedule.flightRoutes);
+  const [selectedPilot, setSelectedPilot] = useState(currentSchedule.selectedPilot);
+  const [selectedAirplane, setSelectedAirplane] = useState(currentSchedule.selectedAirplane);
 
   useEffect(() => {
-    // Buscar la ruta correspondiente para cada número de vuelo ingresado
-    const updatedRoutes = flightNumbers.map(num =>
-      routes.find(route => route.id.toString() === num) || null
-    );
-    setFlightRoutes(updatedRoutes);
-  }, [flightNumbers]);
+    setSchedule((prev) => ({
+      ...prev,
+      [selectedDate]: {
+        flightNumbers,
+        flightRoutes,
+        selectedPilot,
+        selectedAirplane,
+      },
+    }));
+  }, [flightNumbers, flightRoutes, selectedPilot, selectedAirplane, selectedDate]);
+
+  useEffect(() => {
+    const newSchedule = schedule[selectedDate] || {
+      flightNumbers: ["", "", "", "", ""],
+      flightRoutes: [null, null, null, null, null],
+      selectedPilot: null,
+      selectedAirplane: null,
+    };
+
+    setFlightNumbers(newSchedule.flightNumbers);
+    setFlightRoutes(newSchedule.flightRoutes);
+    setSelectedPilot(newSchedule.selectedPilot);
+    setSelectedAirplane(newSchedule.selectedAirplane);
+  }, [selectedDate]);
 
   const handleFlightNumberChange = (text, index) => {
     const newFlightNumbers = [...flightNumbers];
     newFlightNumbers[index] = text;
+
+    const newFlightRoutes = newFlightNumbers.map((num) =>
+      routes.find((route) => route.id.toString() === num) || null
+    );
+
     setFlightNumbers(newFlightNumbers);
+    setFlightRoutes(newFlightRoutes);
+  };
+
+  const handlePilotChange = (pilot) => {
+    console.log("Piloto seleccionado:", pilot);
+    setSelectedPilot(pilot);
+  };
+
+  const handleAirplaneChange = (airplane) => {
+    console.log("Avión seleccionado:", airplane);
+    setSelectedAirplane(airplane);
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
-      <View style={styles.container}>
-        <View style={styles.modalContent}>
+    <Modal visible={visible} animationType="slide" transparent={true}>
+      <View style={styles.modalBackground}>
+        <View style={styles.container}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <MaterialIcons name="close" size={24} color="white" />
+            <MaterialIcons name="close" size={24} color="black" />
           </TouchableOpacity>
 
           <Text style={styles.modalTitle}>Schedule for {selectedDate}</Text>
 
           <View style={styles.filterContainer}>
             <Text style={styles.label}>Select Pilot:</Text>
-            <PilotFilter />
+            <PilotFilter onSelectPilot={handlePilotChange} />
           </View>
 
           <View style={styles.filterContainer}>
             <Text style={styles.label}>Select Aircraft:</Text>
-            <AirplaneFilter />
+            <AirplaneFilter onSelectAirplane={handleAirplaneChange} />
           </View>
 
-          {/* Nueva sección: Flights */}
           <Text style={styles.sectionTitle}>Flights</Text>
           {flightNumbers.map((flightNumber, index) => (
             <View key={index} style={styles.flightRow}>
               <TextInput
                 style={styles.flightInput}
-                placeholder="Flight No."
+                placeholder="Flight #"
                 value={flightNumber}
                 onChangeText={(text) => handleFlightNumberChange(text, index)}
                 keyboardType="numeric"
                 maxLength={4}
               />
-              <Text style={styles.routeText}>
-                {flightRoutes[index] ? `${flightRoutes[index].origin} ➝ ${flightRoutes[index].destination}` : ""}
-              </Text>
+              {flightRoutes[index] && (
+                <Text style={styles.flightInfo}>
+                  {flightRoutes[index].origin} ➝ {flightRoutes[index].destination} ETD {flightRoutes[index].departureTime}
+                </Text>
+              )}
             </View>
           ))}
         </View>
@@ -68,43 +115,29 @@ export default function CalendarModal({ visible, selectedDate, onClose }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContent: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 15,
+  container: {
     width: "90%",
-    height: "80%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-    alignItems: "center",
-    position: "relative",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 15,
   },
   closeButton: {
-    position: "absolute",
-    top: 15,
-    right: 15,
-    backgroundColor: "#ff4d4d",
-    borderRadius: 15,
-    padding: 5,
+    alignSelf: "flex-end",
+    padding: 10,
   },
   modalTitle: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#333",
     textAlign: "center",
   },
   filterContainer: {
-    width: "100%",
     marginBottom: 15,
   },
   label: {
@@ -116,15 +149,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
     marginBottom: 10,
-    marginTop: 15,
-    alignSelf: "flex-start",
   },
   flightRow: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
     marginBottom: 8,
   },
   flightInput: {
@@ -136,10 +165,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginRight: 10,
   },
-  routeText: {
+  flightInfo: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
   },
 });
-
