@@ -1,12 +1,12 @@
-import { View, StyleSheet, SafeAreaView, Text } from "react-native";
-import PilotFilter from "../components/PilotFilter";
-import AirplaneFilter from "@/components/AirplaneFilter";
+import {  StyleSheet, SafeAreaView, Text } from "react-native";
+
 
 export default function Header() {
     return (
         <SafeAreaView style={styles.container}>  
 
             <Text style={styles.titleText}>Catarata Airways</Text>
+            <Text style={styles.subtitle}>Crew Schedule</Text>
             
         </SafeAreaView>  
     );
@@ -17,30 +17,28 @@ const styles = StyleSheet.create({
         flex:1/6,        
         alignItems: "center", 
         justifyContent:"center",
-        backgroundColor:"#9c80f5"    
+
     },
 
     titleText: {
-        fontSize: 20,
+        fontSize: 30,
         fontWeight: "bold",
-        color: "white"
+        color: "white",
+        textShadowColor: "rgba(0, 0, 0, 0.5)", 
+        textShadowOffset: { width: 0, height: 2 }, // Solo hacia abajo
+        textShadowRadius: 4, 
     },
 
-    filters: {
-        flexDirection: "row", 
-        justifyContent: "space-around",
-        alignItems:"center", 
-        
+    subtitle:{
+        color:"white",
+        marginTop:20,
+        fontSize:20,
+        textShadowColor: "rgba(0, 0, 0, 0.5)", // Color de la sombra
+        textShadowOffset: { width: 0, height: 2 }, // Solo hacia abajo
+        textShadowRadius: 4, // Difuminado
     },
 
-    button: {
-        borderWidth: 2,
-        borderColor: "#ff4500",
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-      },
-      
+
 
 
 });

@@ -4,49 +4,28 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 import PilotFilter from "./PilotFilter";
 import AirplaneFilter from "./AirplaneFilter";
-import { routes } from "../data/routes"; 
+import { routes } from "../data/routes";
 
-export default function CalendarModal({ visible, selectedDate, onClose }) {
-  // Estado para almacenar la información por fecha
-  const [schedule, setSchedule] = useState({});
-  
-  const currentSchedule = schedule[selectedDate] || {
-    flightNumbers: ["", "", "", "", ""],
-    flightRoutes: [null, null, null, null, null],
-    selectedPilot: null,
-    selectedAirplane: null,
-  };
+export default function CalendarModal({ visible, selectedDate, daySchedule, onClose, onSave }) {
+  const [flightNumbers, setFlightNumbers] = useState(["", "", "", "", ""]);
+  const [flightRoutes, setFlightRoutes] = useState([null, null, null, null, null]);
+  const [selectedPilot, setSelectedPilot] = useState(null);
+  const [selectedAirplane, setSelectedAirplane] = useState(null);
 
-  const [flightNumbers, setFlightNumbers] = useState(currentSchedule.flightNumbers);
-  const [flightRoutes, setFlightRoutes] = useState(currentSchedule.flightRoutes);
-  const [selectedPilot, setSelectedPilot] = useState(currentSchedule.selectedPilot);
-  const [selectedAirplane, setSelectedAirplane] = useState(currentSchedule.selectedAirplane);
-
+  // Cargar datos cuando cambie la fecha o se abra el modal
   useEffect(() => {
-    setSchedule((prev) => ({
-      ...prev,
-      [selectedDate]: {
-        flightNumbers,
-        flightRoutes,
-        selectedPilot,
-        selectedAirplane,
-      },
-    }));
-  }, [flightNumbers, flightRoutes, selectedPilot, selectedAirplane, selectedDate]);
-
-  useEffect(() => {
-    const newSchedule = schedule[selectedDate] || {
-      flightNumbers: ["", "", "", "", ""],
-      flightRoutes: [null, null, null, null, null],
-      selectedPilot: null,
-      selectedAirplane: null,
-    };
-
-    setFlightNumbers(newSchedule.flightNumbers);
-    setFlightRoutes(newSchedule.flightRoutes);
-    setSelectedPilot(newSchedule.selectedPilot);
-    setSelectedAirplane(newSchedule.selectedAirplane);
-  }, [selectedDate]);
+    if (daySchedule) {
+      setFlightNumbers(daySchedule.flightNumbers || ["", "", "", "", ""]);
+      setFlightRoutes(daySchedule.flightRoutes || [null, null, null, null, null]);
+      setSelectedPilot(daySchedule.selectedPilot || null);
+      setSelectedAirplane(daySchedule.selectedAirplane || null);
+    } else {
+      setFlightNumbers(["", "", "", "", ""]);
+      setFlightRoutes([null, null, null, null, null]);
+      setSelectedPilot(null);
+      setSelectedAirplane(null);
+    }
+  }, [daySchedule, selectedDate]);
 
   const handleFlightNumberChange = (text, index) => {
     const newFlightNumbers = [...flightNumbers];
@@ -60,14 +39,15 @@ export default function CalendarModal({ visible, selectedDate, onClose }) {
     setFlightRoutes(newFlightRoutes);
   };
 
-  const handlePilotChange = (pilot) => {
-    console.log("Piloto seleccionado:", pilot);
-    setSelectedPilot(pilot);
-  };
-
-  const handleAirplaneChange = (airplane) => {
-    console.log("Avión seleccionado:", airplane);
-    setSelectedAirplane(airplane);
+  const handleSave = () => {
+    const newDayData = {
+      flightNumbers,
+      flightRoutes,
+      selectedPilot,
+      selectedAirplane,
+    };
+    onSave(selectedDate, newDayData);
+    onClose();
   };
 
   return (
@@ -82,12 +62,12 @@ export default function CalendarModal({ visible, selectedDate, onClose }) {
 
           <View style={styles.filterContainer}>
             <Text style={styles.label}>Select Pilot:</Text>
-            <PilotFilter onSelectPilot={handlePilotChange} />
+            <PilotFilter onSelectPilot={setSelectedPilot} />
           </View>
 
           <View style={styles.filterContainer}>
             <Text style={styles.label}>Select Aircraft:</Text>
-            <AirplaneFilter onSelectAirplane={handleAirplaneChange} />
+            <AirplaneFilter onSelectAirplane={setSelectedAirplane} />
           </View>
 
           <Text style={styles.sectionTitle}>Flights</Text>
@@ -108,6 +88,10 @@ export default function CalendarModal({ visible, selectedDate, onClose }) {
               )}
             </View>
           ))}
+
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Save</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -117,7 +101,6 @@ export default function CalendarModal({ visible, selectedDate, onClose }) {
 const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -167,6 +150,17 @@ const styles = StyleSheet.create({
   },
   flightInfo: {
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  saveButton: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  saveButtonText: {
+    color: "#fff",
+    textAlign: "center",
     fontWeight: "bold",
   },
 });

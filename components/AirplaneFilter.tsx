@@ -7,14 +7,14 @@ export default function AirplaneFilter({ onSelectAirplane }) {
 
   const airplanes = [
     { key: "HK-4522", value: "HK-4522" },
-    { key:  "HK-4775" , value: "HK-4775" },
+    { key: "HK-4775", value: "HK-4775" },
     { key: "HK-4521", value: "HK-4521" },
   ];
 
   const handleSelection = (value) => {
     setAirplaneSelected(value);
-    onSelectAirplane(value); // Enviar el avión seleccionado al componente padre
-  };
+    onSelectAirplane(value);
+  }; // ✅ Se cierra correctamente la función aquí
 
   return (
     <SelectList

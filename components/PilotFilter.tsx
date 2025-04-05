@@ -13,7 +13,7 @@ export default function PilotFilter({ onSelectPilot }) {
 
   const handleSelection = (value) => {
     setPilotSelected(value);
-    onSelectPilot(value); // Enviar el piloto seleccionado al componente padre
+    onSelectPilot(value); 
   };
 
   return (
