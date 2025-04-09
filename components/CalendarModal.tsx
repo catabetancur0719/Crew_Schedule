@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import {  View,  Text, TextInput, TouchableOpacity, StyleSheet, Modal, Keyboard } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import PilotFilter from "./PilotFilter";
 import AirplaneFilter from "./AirplaneFilter";
 import { routes } from "../data/routes";
 
-export default function CalendarModal({ visible, selectedDate, daySchedule, onClose, onSave }) {
+export default function CalendarModal({
+  visible,
+  selectedDate,
+  onClose,
+  onSave,
+  existingData, 
+}) {
+
   const [flightNumbers, setFlightNumbers] = useState(["", "", "", "", ""]);
   const [flightRoutes, setFlightRoutes] = useState([null, null, null, null, null]);
   const [selectedPilot, setSelectedPilot] = useState(null);
   const [selectedAirplane, setSelectedAirplane] = useState(null);
 
-  // Cargar datos cuando cambie la fecha o se abra el modal
+  // ✅ Carga los datos guardados si existen, o limpia si no hay nada
   useEffect(() => {
-    if (daySchedule) {
-      setFlightNumbers(daySchedule.flightNumbers || ["", "", "", "", ""]);
-      setFlightRoutes(daySchedule.flightRoutes || [null, null, null, null, null]);
-      setSelectedPilot(daySchedule.selectedPilot || null);
-      setSelectedAirplane(daySchedule.selectedAirplane || null);
+    if (existingData) {
+      setFlightNumbers(existingData.flightNumbers || ["", "", "", "", ""]);
+      setFlightRoutes(existingData.flightRoutes || [null, null, null, null, null]);
+      setSelectedPilot(existingData.selectedPilot || null);
+      setSelectedAirplane(existingData.selectedAirplane || null);
     } else {
       setFlightNumbers(["", "", "", "", ""]);
       setFlightRoutes([null, null, null, null, null]);
       setSelectedPilot(null);
       setSelectedAirplane(null);
     }
-  }, [daySchedule, selectedDate]);
+  }, [selectedDate, existingData]);
 
   const handleFlightNumberChange = (text, index) => {
     const newFlightNumbers = [...flightNumbers];
@@ -39,14 +46,26 @@ export default function CalendarModal({ visible, selectedDate, daySchedule, onCl
     setFlightRoutes(newFlightRoutes);
   };
 
+  const handlePilotChange = (pilot) => {
+    setSelectedPilot(pilot);
+  };
+
+  const handleAirplaneChange = (airplane) => {
+    setSelectedAirplane(airplane);
+  };
+
   const handleSave = () => {
-    const newDayData = {
+    const newScheduleData = {
       flightNumbers,
       flightRoutes,
       selectedPilot,
       selectedAirplane,
     };
-    onSave(selectedDate, newDayData);
+
+    if (typeof onSave === "function") {
+      onSave(selectedDate, newScheduleData);
+    }
+
     onClose();
   };
 
@@ -60,16 +79,25 @@ export default function CalendarModal({ visible, selectedDate, daySchedule, onCl
 
           <Text style={styles.modalTitle}>Schedule for {selectedDate}</Text>
 
+        
           <View style={styles.filterContainer}>
             <Text style={styles.label}>Select Pilot:</Text>
-            <PilotFilter onSelectPilot={setSelectedPilot} />
+            <PilotFilter
+              onSelectPilot={handlePilotChange}
+              selectedPilot={selectedPilot}
+            />
           </View>
 
+       
           <View style={styles.filterContainer}>
             <Text style={styles.label}>Select Aircraft:</Text>
-            <AirplaneFilter onSelectAirplane={setSelectedAirplane} />
+           <AirplaneFilter
+              onSelectAirplane={handleAirplaneChange}
+              selectedAirplane={selectedAirplane}
+            />
           </View>
 
+          {/* Números de vuelo */}
           <Text style={styles.sectionTitle}>Flights</Text>
           {flightNumbers.map((flightNumber, index) => (
             <View key={index} style={styles.flightRow}>
@@ -80,17 +108,20 @@ export default function CalendarModal({ visible, selectedDate, daySchedule, onCl
                 onChangeText={(text) => handleFlightNumberChange(text, index)}
                 keyboardType="numeric"
                 maxLength={4}
+                returnKeyType="done"
+                onSubmitEditing={Keyboard.dismiss} 
               />
               {flightRoutes[index] && (
                 <Text style={styles.flightInfo}>
-                  {flightRoutes[index].origin} ➝ {flightRoutes[index].destination} ETD {flightRoutes[index].departureTime}
+                  {flightRoutes[index].origin} ➝ {flightRoutes[index].destination} ETD{" "}
+                  {flightRoutes[index].departureTime}
                 </Text>
               )}
             </View>
           ))}
 
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Save</Text>
+            <Text style={styles.saveButtonText}>Guardar</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -103,6 +134,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.2)",
   },
   container: {
     width: "90%",

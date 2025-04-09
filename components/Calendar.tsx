@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
-import CalendarModal from "./CalendarModal"; 
-
+import CalendarModal from "./CalendarModal";
 
 LocaleConfig.locales["en"] = {
   monthNames: [
@@ -22,27 +21,43 @@ LocaleConfig.locales["en"] = {
 LocaleConfig.defaultLocale = "en";
 
 export default function Schedule() {
-  const [selected, setSelected] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [scheduledData, setScheduledData] = useState({}); // ⬅️ AQUÍ GUARDAMOS TODO
+
+  const handleOpenModal = (day) => {
+    setSelectedDate(day.dateString);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleSaveSchedule = (date, newData) => {
+    setScheduledData((prev) => ({
+      ...prev,
+      [date]: newData,
+    }));
+  };
 
   return (
     <View style={styles.container}>
       <Calendar
         style={styles.calendar}
-        onDayPress={(day) => {
-          setSelected(day.dateString);
-          setModalVisible(true); 
-        }}
+        onDayPress={handleOpenModal}
         markedDates={{
-          [selected]: { selected: true, disableTouchEvent: true, selectedDotColor: "orange" },
+          [selectedDate]: { selected: true, disableTouchEvent: true, selectedDotColor: "#7367f090" },
         }}
       />
 
-      
       <CalendarModal
+      key={selectedDate}
         visible={modalVisible}
-        selectedDate={selected}
-        onClose={() => setModalVisible(false)}
+        selectedDate={selectedDate}
+        onClose={handleCloseModal}
+        onSave={handleSaveSchedule}
+        existingData={scheduledData[selectedDate]} // 👈 Asegúrate que sea esto
       />
     </View>
   );
@@ -55,7 +70,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: -150,
   },
-
   calendar: {
     borderRadius: 10,
     elevation: 4,

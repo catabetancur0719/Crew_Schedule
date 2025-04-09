@@ -1,27 +1,25 @@
 import { SelectList } from "react-native-dropdown-select-list";
-import { useState } from "react";
 import { StyleSheet } from "react-native";
 
-export default function PilotFilter({ onSelectPilot }) {
-  const [pilotSelected, setPilotSelected] = useState("");
+type PilotFilterProps = {
+  onSelectPilot: (value: string) => void;
+  selectedPilot: string | null;
+};
 
+export default function PilotFilter({ onSelectPilot, selectedPilot }: PilotFilterProps) {
   const pilots = [
-    { key:"Catalina Betancur", value: "Catalina Betancur" },
-    { key:"Andres Betancur", value: "Andres Betancur" },
-    { key:"Juliana Orozco", value: "Juliana Orozco" },
+    { key: "Catalina Betancur", value: "Catalina Betancur" },
+    { key: "Andres Betancur", value: "Andres Betancur" },
+    { key: "Juliana Orozco", value: "Juliana Orozco" },
   ];
-
-  const handleSelection = (value) => {
-    setPilotSelected(value);
-    onSelectPilot(value); 
-  };
 
   return (
     <SelectList
-      setSelected={handleSelection}
+      setSelected={onSelectPilot}
       data={pilots}
       placeholder="Select a Pilot"
       boxStyles={styles.listado}
+      defaultOption={selectedPilot ? { key: selectedPilot, value: selectedPilot } : undefined}
     />
   );
 }

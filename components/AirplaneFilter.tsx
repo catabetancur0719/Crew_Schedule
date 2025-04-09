@@ -1,27 +1,23 @@
 import { SelectList } from "react-native-dropdown-select-list";
-import { useState } from "react";
 import { StyleSheet } from "react-native";
 
-export default function AirplaneFilter({ onSelectAirplane }) {
-  const [airplaneSelected, setAirplaneSelected] = useState("");
-
+export default function AirplaneFilter({ onSelectAirplane, selectedAirplane }) {
   const airplanes = [
     { key: "HK-4522", value: "HK-4522" },
     { key: "HK-4775", value: "HK-4775" },
     { key: "HK-4521", value: "HK-4521" },
   ];
 
-  const handleSelection = (value) => {
-    setAirplaneSelected(value);
-    onSelectAirplane(value);
-  }; // ✅ Se cierra correctamente la función aquí
-
   return (
     <SelectList
-      setSelected={handleSelection}
+      setSelected={onSelectAirplane} // ✅ Pasa directamente la función del padre
       data={airplanes}
       placeholder="Select an Airplane"
       boxStyles={styles.listado}
+      save="value"
+      defaultOption={
+        selectedAirplane ? { key: selectedAirplane, value: selectedAirplane } : undefined
+      }
     />
   );
 }
